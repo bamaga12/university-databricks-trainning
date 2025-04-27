@@ -45,8 +45,8 @@ def run_testcase(spark):
     # Test Case 1: Kiểm tra đường dẫn có tồn tại hay không ?
     if check_path_exists(check_data_path):
         if check_parquet_snappy(check_data_path):
-            if check_sorted_descending(check_data_path, "unique_users"):
-                check_content_files(check_data_path, base_path)
+            if check_sorted_descending(check_data_path, "unique_users", spark):
+                check_content_files(check_data_path, base_path, spark)
 
 
 def check_path_exists(path):
@@ -75,7 +75,7 @@ def check_parquet_snappy(path):
         print(f"✅ Có file định dạng .parquet trong {path}!")
         return True
 
-def check_sorted_descending(path, column_name):
+def check_sorted_descending(path, column_name, spark):
     df = spark.read.parquet(path)
     values = [row[column_name] for row in df.select(column_name).collect()]
     if all(values[i] >= values[i+1] for i in range(len(values)-1)):
@@ -85,7 +85,7 @@ def check_sorted_descending(path, column_name):
         print(f"❌ Dữ liệu đang KHÔNG sắp xếp giảm dần!")
         return False
 
-def check_content_files(path, base_path):
+def check_content_files(path, base_path, spark):
     base_data = spark.read.parquet(base_path)
     check_data = spark.read.parquet(path)
     diff = check_data.union(base_data).distinct().count() - base_data.count()
