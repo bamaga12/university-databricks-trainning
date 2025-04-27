@@ -28,7 +28,7 @@ def download_github_file(repo_owner, repo_name, file_path, save_path, branch="ma
         print(f"Failed to download {file_path}, Status Code: {response.status_code}")
 
 
-def run_testcase():
+def run_testcase(spark):
     github_folder_bai2 = "data/result/Test2904/Bai2"
     dbfs_base_path_bai2 = "/mnt/github_files/" + github_folder_bai2
     repo_owner = "bamaga12"
