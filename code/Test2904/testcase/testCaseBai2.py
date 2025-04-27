@@ -1,10 +1,6 @@
 import pyspark.sql.functions as F
 import requests
 import os
-github_folder_bai2 = "data/result/Test2904/Bai2"
-dbfs_base_path_bai2 = "/mnt/github_files/" + github_folder_bai2
-repo_owner = "bamaga12"
-repo_name = "university-databricks-trainning"
 
 def list_files_in_github_folder(repo_owner, repo_name, folder_path, branch="main"):
     api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{folder_path}?ref={branch}"
@@ -32,6 +28,10 @@ def download_github_file(repo_owner, repo_name, file_path, save_path, branch="ma
 
 
 def run_testcase():
+    github_folder_bai2 = "data/result/Test2904/Bai2"
+    dbfs_base_path_bai2 = "/mnt/github_files/" + github_folder_bai2
+    repo_owner = "bamaga12"
+    repo_name = "university-databricks-trainning"
     # Get list of files and download them
     file_list = list_files_in_github_folder(repo_owner, repo_name, github_folder_bai2)
 
