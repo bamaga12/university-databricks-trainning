@@ -82,9 +82,9 @@ def check_schema_is_correct(path, base_path, spark):
     check_schema = check_data.schema
 
     if base_schema == check_schema:
-            print(f"✅ Schema của file tại {path} giống schema của file mẫu.")
-        else:
-            print(f"❌ Schema không khớp!")
+        print(f"✅ Schema của file tại {path} giống schema của file mẫu.")
+    else:
+        print(f"❌ Schema không khớp!")
 
 
 def check_content_files(path, base_path, spark):
