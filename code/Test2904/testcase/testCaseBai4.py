@@ -44,7 +44,7 @@ def run_testcase(spark):
     check_data_path = "file:///dbfs/KiemTra2904/Bai4"
     # Test Case 1: Kiểm tra đường dẫn có tồn tại hay không ?
     if check_path_exists(check_data_path):
-        if check_csv_gz(check_data_path):
+        if check_json(check_data_path):
             if check_schema_is_correct(check_data_path, base_path, spark):
                     check_content_files(check_data_path, base_path, spark)
 
