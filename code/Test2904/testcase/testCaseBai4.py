@@ -29,7 +29,7 @@ def download_github_file(repo_owner, repo_name, file_path, save_path, branch="ma
 
 
 def run_testcase(spark):
-    github_folder_bai4 = "data/result/Test2904/Bai3"
+    github_folder_bai4 = "data/result/Test2904/Bai4"
     dbfs_base_path_bai4 = "/mnt/github_files/" + github_folder_bai4
     repo_owner = "bamaga12"
     repo_name = "university-databricks-trainning"
