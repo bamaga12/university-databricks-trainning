@@ -1,3 +1,4 @@
+#Databricks notebook source
 import pyspark.sql.functions as F
 import requests
 import os
@@ -93,3 +94,4 @@ def check_content_files(path, base_path):
     else:
         print("❌ Dữ liệu không chính xác!")    
     
+# COMMAND ----------
