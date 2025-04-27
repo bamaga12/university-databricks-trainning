@@ -1,4 +1,3 @@
-%python
 import pyspark.sql.functions as F
 import requests
 import os
@@ -31,7 +30,7 @@ def download_github_file(repo_owner, repo_name, file_path, save_path, branch="ma
         print(f"Failed to download {file_path}, Status Code: {response.status_code}")
 
 
-def testcase_bai2():
+def run_testcase():
     # Get list of files and download them
     file_list = list_files_in_github_folder(repo_owner, repo_name, github_folder_bai2)
 
