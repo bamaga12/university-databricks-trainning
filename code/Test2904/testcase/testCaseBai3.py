@@ -46,7 +46,7 @@ def run_testcase(spark):
     if check_path_exists(check_data_path):
         if check_csv_gz(check_data_path):
             if check_schema_is_correct(check_data_path, base_path, spark):
-                    check_content_files(check_data_path, base_path, spark)
+                check_content_files(check_data_path, base_path, spark)
 
 
 def check_path_exists(path):
@@ -76,20 +76,22 @@ def check_csv_gz(path):
         return True
 
 def check_schema_is_correct(path, base_path, spark):
-    base_data = spark.read.parquet(base_path)
-    check_data = spark.read.parquet(path)
+    base_data = spark.read.option("compression", "gzip").csv(base_path)
+    check_data = spark.read.option("compression", "gzip").csv(path)
     base_schema = base_data.schema
     check_schema = check_data.schema
 
     if base_schema == check_schema:
-        print(f"✅ Schema của file tại {path} giống schema của file mẫu.")
+        print(f"✅ Schema của file tại {path} đúng!")
+        return True
     else:
         print(f"❌ Schema không khớp!")
+        return False
 
 
 def check_content_files(path, base_path, spark):
-    base_data = spark.read.parquet(base_path)
-    check_data = spark.read.parquet(path)
+    base_data = spark.read.option("compression", "gzip").csv(base_path)
+    check_data = spark.read.option("compression", "gzip").csv(path)
     diff = check_data.union(base_data).distinct().count() - base_data.count()
     if diff == 0:
         print("✅ Dữ liệu chính xác!")

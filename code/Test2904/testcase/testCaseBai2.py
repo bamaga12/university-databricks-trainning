@@ -83,9 +83,11 @@ def check_schema_is_correct(path, base_path, spark):
     check_schema = check_data.schema
 
     if base_schema == check_schema:
-        print(f"✅ Schema của file tại {path} giống schema của file mẫu.")
+        print(f"✅ Schema của file tại {path} đúng.")
+        return True
     else:
         print(f"❌ Schema không khớp!")
+        return False
 
 
 def check_sorted_descending(path, column_name, spark):
