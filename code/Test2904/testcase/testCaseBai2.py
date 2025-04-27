@@ -45,8 +45,9 @@ def run_testcase(spark):
     # Test Case 1: Kiểm tra đường dẫn có tồn tại hay không ?
     if check_path_exists(check_data_path):
         if check_parquet_snappy(check_data_path):
-            if check_sorted_descending(check_data_path, "unique_users", spark):
-                check_content_files(check_data_path, base_path, spark)
+            if check_schema_is_correct(check_data_path, base_path, spark):
+                if check_sorted_descending(check_data_path, "unique_users", spark):
+                    check_content_files(check_data_path, base_path, spark)
 
 
 def check_path_exists(path):
@@ -74,6 +75,18 @@ def check_parquet_snappy(path):
     else:
         print(f"✅ Có file định dạng .parquet trong {path}!")
         return True
+
+def check_schema_is_correct(path, base_path, spark):
+    base_data = spark.read.parquet(base_path)
+    check_data = spark.read.parquet(path)
+    base_schema = base_data.schema
+    check_schema = check_data.schema
+
+    if base_schema == check_schema:
+            print(f"✅ Schema của file tại {path} giống schema của file mẫu.")
+        else:
+            print(f"❌ Schema không khớp!")
+
 
 def check_sorted_descending(path, column_name, spark):
     df = spark.read.parquet(path)
