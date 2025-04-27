@@ -31,14 +31,14 @@ def download_github_file(repo_owner, repo_name, file_path, save_path, branch="ma
         print(f"Failed to download {file_path}, Status Code: {response.status_code}")
 
 
-# Get list of files and download them
-file_list = list_files_in_github_folder(repo_owner, repo_name, github_folder_bai2)
-
-for file_path in file_list:
-    save_path = f"{dbfs_base_path_bai2}/{os.path.basename(file_path)}"
-    download_github_file(repo_owner, repo_name, file_path, save_path)
-
 def testcase_bai2():
+    # Get list of files and download them
+    file_list = list_files_in_github_folder(repo_owner, repo_name, github_folder_bai2)
+
+    for file_path in file_list:
+        save_path = f"{dbfs_base_path_bai2}/{os.path.basename(file_path)}"
+        download_github_file(repo_owner, repo_name, file_path, save_path)
+
     base_path = f"""file:///dbfs{dbfs_base_path_bai2}"""
     check_data_path = "file:///dbfs/KiemTra2904/Bai2"
     # Test Case 1: Kiểm tra đường dẫn có tồn tại hay không ?
