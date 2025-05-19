@@ -2,7 +2,7 @@
 import pyspark.sql.functions as F
 import requests
 import os
-import baseFunction.baseFunction as base
+import baseFunction as base
 
 def run_testcase(spark, basePath, numQuestion):
     github_folder = f"data/result/{basePath}/{numQuestion}"
