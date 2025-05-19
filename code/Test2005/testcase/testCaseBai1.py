@@ -42,7 +42,7 @@ def run_testcase(spark, basePath, numQuestion):
         download_github_file(repo_owner, repo_name, file_path, save_path)
 
     base_path = f"""file:///dbfs{dbfs_base_path}"""
-    check_data_path = f"file:///dbfs/{basePath}/{numQuestion}}"
+    check_data_path = f"file:///dbfs/{basePath}/{numQuestion}"
     if base.check_path_exists(check_data_path):
         if base.check_file_type(check_data_path, extension="csv"):
             if base.check_schema_is_correct(check_data_path, base_path, spark, extension="csv"):
