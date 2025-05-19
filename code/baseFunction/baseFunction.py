@@ -56,9 +56,9 @@ def check_schema_is_correct(path, base_path, spark, extension, rowTag=None):
     else:
         print(f"❌ Schema không khớp!")
         print("Schema gốc:")
-        base_schema.printSchema()
+        print(base_schema)
         print("Schema kiểm tra:")
-        check_schema.printSchema()
+        print(check_schema)
         return False
 
 
