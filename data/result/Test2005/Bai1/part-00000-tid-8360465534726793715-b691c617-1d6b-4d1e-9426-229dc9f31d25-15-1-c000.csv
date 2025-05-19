@@ -1,4 +1,4 @@
-date,sum(totalPrice)
+date,totalPrice
 2024-05-01,4128
 2024-05-02,4074
 2024-05-03,4278
