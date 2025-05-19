@@ -1,5 +1,7 @@
 import re
 import os
+import pyspark.sql.functions as F
+import requests
 
 def check_path_exists(path):
     """
@@ -144,3 +146,28 @@ def check_content_files(path, base_path, spark, extension, rowTag=None):
 
     except Exception as e:
         print(f"⚠️ Lỗi trong quá trình xử lý: {e}")
+
+def list_files_in_github_folder(repo_owner, repo_name, folder_path, branch="main"):
+    api_url = f"https://api.github.com/repos/{repo_owner}/{repo_name}/contents/{folder_path}?ref={branch}"
+    response = requests.get(api_url)
+    
+    if response.status_code == 200:
+        contents = response.json()
+        return [item['path'] for item in contents if item['type'] == 'file']
+    else:
+        print(f"Failed to list files in {folder_path}, Status Code: {response.status_code}")
+        return []
+
+def download_github_file(repo_owner, repo_name, file_path, save_path, branch="main"):
+    raw_url = f"https://raw.githubusercontent.com/{repo_owner}/{repo_name}/{branch}/{file_path}"
+    response = requests.get(raw_url)
+
+    if response.status_code == 200:
+        dbfs_path = f"/dbfs{save_path}"
+        os.makedirs(os.path.dirname(dbfs_path), exist_ok=True)
+        with open(dbfs_path, "wb") as file:
+            file.write(response.content)
+        print(f"Downloaded: {file_path} to {save_path}")
+    else:
+        print(f"Failed to download {file_path}, Status Code: {response.status_code}")
+
