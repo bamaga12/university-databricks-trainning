@@ -5,7 +5,7 @@ import os
 import baseFunction.baseFunction as base
 
 def run_testcase(spark, basePath, numQuestion):
-    extension = "gz.parquet"
+    extension = "parquet"
     github_folder = f"data/result/{basePath}/{numQuestion}"
     dbfs_base_path = "/mnt/github_files/" + github_folder
     repo_owner = "bamaga12"
