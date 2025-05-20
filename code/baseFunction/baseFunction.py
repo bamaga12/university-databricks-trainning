@@ -66,48 +66,62 @@ def read_data(spark, path, extension, rowTag, compression):
         print(f"❌ Extension '{extension}' không được hỗ trợ.")
         return None
 
-def check_schema_is_correct(path, base_path, spark, extension, rowTag=None, compression=None):
-    
+
+def split_schema(schema, partition_col_names):
+    """
+    Trả về:
+    - data_columns: list các StructField không phải partition
+    - partition_columns: list các StructField là partition
+    """
+    data_columns = [f for f in schema.fields if f.name not in partition_col_names]
+    partition_columns = [f for f in schema.fields if f.name in partition_col_names]
+    return data_columns, partition_columns
+
+
+def check_schema_is_correct(path, base_path, spark, extension, rowTag=None, compression=None, partition_cols=[]):
     base_data = read_data(spark, base_path, extension, rowTag, compression)
     check_data = read_data(spark, path, extension, rowTag, compression)
 
     if base_data is None or check_data is None:
         return False
 
-    base_schema = base_data.schema
-    check_schema = check_data.schema
+    # Tách schema
+    base_data_cols, base_part_cols = split_schema(base_data.schema, partition_cols)
+    check_data_cols, check_part_cols = split_schema(check_data.schema, partition_cols)
 
-    if base_schema == check_schema:
-        print(f"✅ Schema của file tại {path} đúng.")
-        return True
-    else:
-        print(f"❌ Schema không khớp!")
-        print("Schema gốc:")
-        print(base_schema)
-        print("Schema kiểm tra:")
-        print(check_schema)
+    # So sánh phần dữ liệu chính (theo thứ tự)
+    if base_data_cols != check_data_cols:
+        print("❌ Schema data columns không khớp (phân biệt thứ tự)")
+        print("Base:", base_data_cols)
+        print("Check:", check_data_cols)
         return False
 
+    # So sánh partition columns (không phân biệt thứ tự)
+    base_part_set = set((f.name, f.dataType.simpleString()) for f in base_part_cols)
+    check_part_set = set((f.name, f.dataType.simpleString()) for f in check_part_cols)
 
-def is_partitioned_path(path, spark):
-    fs = spark._jvm.org.apache.hadoop.fs.FileSystem.get(spark._jsc.hadoopConfiguration())
-    hadoop_path = spark._jvm.org.apache.hadoop.fs.Path(path)
-    
-    if not fs.exists(hadoop_path):
-        print(f"❌ Đường dẫn không tồn tại: {path}")
+    if base_part_set != check_part_set:
+        print("❌ Schema partition columns không khớp (không phân biệt thứ tự)")
+        print("Base:", base_part_set)
+        print("Check:", check_part_set)
         return False
-    
-    # Lấy danh sách thư mục con
-    status = fs.listStatus(hadoop_path)
-    dirs = [f.getPath().getName() for f in status if f.isDirectory()]
 
-    # Kiểm tra xem có thư mục dạng 'key=value' không
-    for d in dirs:
-        if re.match(r"[^=]+=[^=]+", d):
-            print(f"✅ Đường dẫn chứa partitionBy: {d}")
+    print(f"✅ Schema của file tại {path} đúng (đã kiểm tra partition logic).")
+    return True
+
+
+
+def is_partitioned_path(path, spark, extension, rowTag=None, compression=None):
+    input_files = read_data(spark, path, extension, rowTag, compression).inputFiles()
+    
+    for file_path in input_files:
+        # Nếu trong đường dẫn có ký tự '=' (dạng cột=giá_trị) thì là partition
+        if "=" in file_path:
+            print(f"✅ Folder {path} có sử dụng partition (phát hiện trong đường dẫn file):")
+            # print(file_path)
             return True
 
-    print("❌ Đường dẫn KHÔNG chứa partitionBy.")
+    print(f"❌ Folder {path} KHÔNG sử dụng partition.")
     return False
 
 
@@ -124,20 +138,22 @@ def check_sorted_descending(path, column_name, spark):
 
 import re
 
-def check_content_files(path, base_path, spark, extension, rowTag=None, compression=None):
+def check_content_files(path, base_path, spark, extension, rowTag=None, compression=None, partition_cols=[]):
     try:
         # Đọc dữ liệu
         base_data = read_data(spark, base_path, extension, rowTag, compression)
         check_data = read_data(spark, path, extension, rowTag, compression)
 
-        # Kiểm tra schema
-        if base_data.schema != check_data.schema:
-            print("❌ Schema không khớp, không thể so sánh nội dung!")
-            print("🔧 Schema file gốc:")
-            base_data.printSchema()
-            print("🔍 Schema file kiểm tra:")
-            check_data.printSchema()
-            return
+        # Xây dựng danh sách cột chuẩn: giữ nguyên thứ tự cột gốc (không có partition)
+        base_cols = [f.name for f in base_data.schema.fields]
+        # Thêm partition cols nếu thiếu (Spark có thể tự thêm vào cuối)
+        for pcol in partition_cols:
+            if pcol not in base_cols:
+                base_cols.append(pcol)
+
+        # Reorder các dataframe theo cùng thứ tự cột
+        base_data = base_data.select(base_cols)
+        check_data = check_data.select(base_cols)
 
         # So sánh nội dung
         missing_from_check = base_data.exceptAll(check_data)
