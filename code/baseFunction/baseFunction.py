@@ -45,7 +45,7 @@ def check_file_type(path, extension, compression=None):
         print(f"✅ Có file định dạng {check_partten} trong {path}!")
         return True
 
-def read_data(spark, path, extension, rowTag=None, compression=None):
+def read_data(spark, path, extension, rowTag, compression):
     reader = spark.read
 
     if compression is not None:
