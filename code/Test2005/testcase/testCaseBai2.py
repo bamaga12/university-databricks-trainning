@@ -21,7 +21,7 @@ def run_testcase(spark, basePath, numQuestion):
     check_data_path = f"file:///dbfs/{basePath}/{numQuestion}"
     if base.check_path_exists(check_data_path):
         if base.check_file_type(check_data_path, extension=extension):
-            if base.check_schema_is_correct(check_data_path, base_path, spark, extension=extension):
-                    base.check_content_files(check_data_path, base_path, spark, extension=extension)
+            if base.check_schema_is_correct(check_data_path, base_path, spark, extension=extension, compression="gzip"):
+                    base.check_content_files(check_data_path, base_path, spark, extension=extension, compression="gzip")
 
 # COMMAND ----------

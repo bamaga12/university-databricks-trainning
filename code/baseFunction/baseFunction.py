@@ -15,38 +15,63 @@ def check_path_exists(path):
         print(f"❌ Đường dẫn {path} không tồn tại!")
         return False
 
-def check_file_type(path, extension):
+def check_file_type(path, extension, compression=None):
     """
-    Kiểm tra tất cả file parquet trong path có đang sử dụng Snappy compression hay không
+    Kiểm tra:
+    - Thư mục có chứa ít nhất 1 file với đuôi mở rộng mong muốn không?
+    - Nếu là parquet và có truyền expected_compression => kiểm tra codec nén
+    
+    Args:
+        path (str): Đường dẫn thư mục chứa file (nên là file:///dbfs/...)
+        extension (str): ví dụ ".parquet", ".csv", ".json"
+        spark (SparkSession): bắt buộc nếu dùng kiểm tra codec parquet
+        expected_compression (str): "snappy", "gzip", "uncompressed", ...
     """
     dbfs_path = path.replace("file://", "") 
     files = os.listdir(dbfs_path)
-    parquet_files = [f for f in files if f.endswith(extension)]
-    if not parquet_files:
-        print(f"❌ Không có file định dạng {extension} trong {path}")
+    check_partten = extension
+
+    if compression is not None:
+        if compression == "gzip":
+            check_partten = f"gz.{check_partten}"
+        else:
+            check_partten = f"{compression}.{check_partten}"
+
+    files = [f for f in files if f.endswith(check_partten)]
+    if not files:
+        print(f"❌ Không có file định dạng {check_partten} trong {path}")
         return False
     else:
-        print(f"✅ Có file định dạng {extension} trong {path}!")
+        print(f"✅ Có file định dạng {check_partten} trong {path}!")
         return True
 
-def check_schema_is_correct(path, base_path, spark, extension, rowTag=None):
+def read_data(spark, path, extension, rowTag=None, compression=None):
+    reader = spark.read
+
+    if compression is not None:
+        reader = reader.option("compression", compression)
+
     if extension == "parquet":
-        base_data = spark.read.parquet(base_path)
-        check_data = spark.read.parquet(path)
+        return reader.parquet(path)
     elif extension == "csv":
-        base_data = spark.read.option("header", "true").csv(base_path)
-        check_data = spark.read.option("header", "true").csv(path)
+        return reader.option("header", "true").csv(path)
     elif extension == "json":
-        base_data = spark.read.json(base_path)
-        check_data = spark.read.json(path)
+        return reader.json(path)
     elif extension == "xml":
         if rowTag is None:
             print("❌ Định dạng XML yêu cầu truyền vào rowTag.")
-            return False
-        base_data = spark.read.format("xml").option("rowTag", rowTag).load(base_path)
-        check_data = spark.read.format("xml").option("rowTag", rowTag).load(path)
+            return None
+        return reader.format("xml").option("rowTag", rowTag).load(path)
     else:
         print(f"❌ Extension '{extension}' không được hỗ trợ.")
+        return None
+
+def check_schema_is_correct(path, base_path, spark, extension, rowTag=None, compression=None):
+    
+    base_data = read_data(path, base_path, spark, extension, rowTag, compression)
+    check_data = read_data(path, base_path, spark, extension, rowTag, compression)
+
+    if base_data is None or check_data is None:
         return False
 
     base_schema = base_data.schema
@@ -99,25 +124,11 @@ def check_sorted_descending(path, column_name, spark):
 
 import re
 
-def check_content_files(path, base_path, spark, extension, rowTag=None):
-    def read_data(p):
-        if extension == "parquet":
-            return spark.read.parquet(p)
-        elif extension == "csv":
-            return spark.read.option("header", "true").csv(p)
-        elif extension == "json":
-            return spark.read.json(p)
-        elif extension == "xml":
-            if rowTag is None:
-                raise ValueError("Với định dạng XML, cần truyền vào rowTag.")
-            return spark.read.format("xml").option("rowTag", rowTag).load(p)
-        else:
-            raise ValueError(f"❌ Định dạng '{extension}' không được hỗ trợ.")
-
+def check_content_files(path, base_path, spark, extension, rowTag=None, compression=None):
     try:
         # Đọc dữ liệu
-        base_data = read_data(base_path)
-        check_data = read_data(path)
+        base_data = read_data(path, base_path, spark, extension, rowTag, compression)
+        check_data = read_data(path, base_path, spark, extension, rowTag, compression)
 
         # Kiểm tra schema
         if base_data.schema != check_data.schema:
