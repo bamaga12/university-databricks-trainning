@@ -68,8 +68,8 @@ def read_data(spark, path, extension, rowTag=None, compression=None):
 
 def check_schema_is_correct(path, base_path, spark, extension, rowTag=None, compression=None):
     
-    base_data = read_data(path, base_path, spark, extension, rowTag, compression)
-    check_data = read_data(path, base_path, spark, extension, rowTag, compression)
+    base_data = read_data(spark, base_path, extension, rowTag, compression)
+    check_data = read_data(spark, path, extension, rowTag, compression)
 
     if base_data is None or check_data is None:
         return False
@@ -127,8 +127,8 @@ import re
 def check_content_files(path, base_path, spark, extension, rowTag=None, compression=None):
     try:
         # Đọc dữ liệu
-        base_data = read_data(path, base_path, spark, extension, rowTag, compression)
-        check_data = read_data(path, base_path, spark, extension, rowTag, compression)
+        base_data = read_data(spark, base_path, extension, rowTag, compression)
+        check_data = read_data(spark, path, extension, rowTag, compression)
 
         # Kiểm tra schema
         if base_data.schema != check_data.schema:
