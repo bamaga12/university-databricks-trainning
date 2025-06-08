@@ -124,6 +124,28 @@ def is_partitioned_path(path, spark, extension, rowTag=None, compression=None):
     print(f"❌ Folder {path} KHÔNG sử dụng partition.")
     return False
 
+def check_number_of_files(path, extension, rowTag=None, compression=None, desired_number_of_files=None):
+    dbfs_path = f"dbfs:/FileStore/{path}"
+    
+    # List only files in the current directory (non-recursive)
+    files = dbutils.fs.ls(dbfs_path)
+
+    # Filter files by extension and optional compression
+    matched_files = [
+        f for f in files
+        if f.name.endswith(extension) and
+           (compression is None or f.name.endswith(compression + extension))
+    ]
+
+    actual_count = len(matched_files)
+    print(f"Found {actual_count} file(s) with extension '{extension}' (expected: {desired_number_of_files})")
+
+    if actual_count == desired_number_of_files:
+        print("✅ File count matches.")
+        return True
+    else:
+        print("❌ File count does not match.")
+        return False
 
 
 def check_sorted_descending(path, column_name, spark):
@@ -164,12 +186,15 @@ def check_content_files(path, base_path, spark, extension, rowTag=None, compress
 
         if missing_count == 0 and extra_count == 0:
             print("✅ Dữ liệu chính xác!")
+            return True
         else:
             print("❌ Dữ liệu không chính xác!")
             if missing_count > 0:
                 print(f"⚠️ Thiếu {missing_count} dòng so với dữ liệu gốc.")
             if extra_count > 0:
                 print(f"⚠️ Thừa {extra_count} dòng so với dữ liệu gốc.")
+            
+            return False
 
     except Exception as e:
         print(f"⚠️ Lỗi trong quá trình xử lý: {e}")
