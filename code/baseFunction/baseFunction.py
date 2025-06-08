@@ -55,7 +55,7 @@ def read_data(spark, path, extension, rowTag, compression):
     if extension == "parquet":
         return reader.parquet(path)
     elif extension == "csv":
-        return reader.option("header", "true").csv(path)
+        return reader.option("headrow", "true").csv(path)
     elif extension == "json":
         return reader.json(path)
     elif extension == "xml":
