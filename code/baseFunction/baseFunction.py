@@ -74,12 +74,15 @@ def split_schema(schema, partition_col_names):
     - data_columns: list các StructField không phải partition
     - partition_columns: list các StructField là partition
     """
-    data_columns = [f for f in schema.fields if f.name not in partition_col_names]
-    partition_columns = [f for f in schema.fields if f.name in partition_col_names]
-    return data_columns, partition_columns
+    if partition_col_names is not None:
+        data_columns = [f for f in schema.fields if f.name not in partition_col_names]
+        partition_columns = [f for f in schema.fields if f.name in partition_col_names]
+        return data_columns, partition_columns
+    else:
+        return schema.fields, None
 
 
-def check_schema_is_correct(path, base_path, spark, extension, rowTag=None, compression=None, partition_cols=[]):
+def check_schema_is_correct(path, base_path, spark, extension, rowTag=None, compression=None, partition_cols=None):
     base_data = read_data(spark, base_path, extension, rowTag, compression)
     check_data = read_data(spark, path, extension, rowTag, compression)
 
