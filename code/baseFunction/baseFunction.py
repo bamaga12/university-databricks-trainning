@@ -101,14 +101,15 @@ def check_schema_is_correct(path, base_path, spark, extension, rowTag=None, comp
         return False
 
     # So sánh partition columns (không phân biệt thứ tự)
-    base_part_set = set((f.name, f.dataType.simpleString()) for f in base_part_cols)
-    check_part_set = set((f.name, f.dataType.simpleString()) for f in check_part_cols)
+    if partition_cols is not None:
+        base_part_set = set((f.name, f.dataType.simpleString()) for f in base_part_cols)
+        check_part_set = set((f.name, f.dataType.simpleString()) for f in check_part_cols)
 
-    if base_part_set != check_part_set:
-        print("❌ Schema partition columns không khớp (không phân biệt thứ tự)")
-        print("Base:", base_part_set)
-        print("Check:", check_part_set)
-        return False
+        if base_part_set != check_part_set:
+            print("❌ Schema partition columns không khớp (không phân biệt thứ tự)")
+            print("Base:", base_part_set)
+            print("Check:", check_part_set)
+            return False
 
     print(f"✅ Schema của file tại {path} đúng (đã kiểm tra partition logic).")
     return True
