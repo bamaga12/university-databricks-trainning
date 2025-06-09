@@ -129,11 +129,9 @@ def is_partitioned_path(path, spark, extension, rowTag=None, compression=None):
     print(f"❌ Folder {path} KHÔNG sử dụng partition.")
     return False
 
-def check_number_of_files(path, extension, rowTag=None, compression=None, desired_number_of_files=None):
-    dbfs_path = f"dbfs:/FileStore/{path}"
-    
+def check_number_of_files(path, extension, rowTag=None, compression=None, desired_number_of_files=None):    
     # List only files in the current directory (non-recursive)
-    files = dbutils.fs.ls(dbfs_path)
+    files = dbutils.fs.ls(path)
 
     # Filter files by extension and optional compression
     matched_files = [
