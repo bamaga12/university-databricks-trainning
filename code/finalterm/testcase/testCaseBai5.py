@@ -26,10 +26,8 @@ def run_testcase(spark, basePath, mssv, numQuestion):
             totalpoint += 10
             if base.check_schema_is_correct(check_data_path, base_path, spark, extension=extension):
                 totalpoint += 10
-                if base.check_number_of_files(check_data_path, extension=extension, desired_number_of_files=6):
-                    totalpoint += 10
-                    if base.check_content_files(check_data_path, base_path, spark, extension=extension):
-                        totalpoint += 60
+                if base.check_content_files(check_data_path, base_path, spark, extension=extension):
+                    totalpoint += 70
 
     return totalpoint
 
