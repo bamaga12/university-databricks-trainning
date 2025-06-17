@@ -22,7 +22,7 @@ def run_testcase(spark, basePath, mssv, numQuestion, shiftNumber):
     totalpoint = 0
     if base.check_path_exists(check_data_path):
         totalpoint += 10
-        if base.check_file_type(check_data_path, extension=extension):
+        if base.is_partitioned_path(check_data_path, spark, extension=extension, compression="gzip"):
             totalpoint += 10
             if base.check_schema_is_correct(check_data_path, base_path, spark, extension=extension, compression="gzip", partition_cols=["salesrep"]):
                 totalpoint += 10
