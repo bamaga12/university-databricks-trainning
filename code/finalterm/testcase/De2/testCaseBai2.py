@@ -4,9 +4,9 @@ import requests
 import os
 import baseFunction.baseFunction as base
 
-def run_testcase(spark, basePath, mssv, numQuestion, shiftNumber):
+def run_testcase(spark, basePath, mssv, numQuestion, shiftNumber, approach = 1):
     extension = "parquet"
-    github_folder = f"data/result/{basePath}/De{shiftNumber}/{numQuestion}"
+    github_folder = f"data/result/{basePath}/De{shiftNumber}/Cach{approach}/{numQuestion}"
     dbfs_base_path = "/mnt/github_files/" + github_folder
     repo_owner = "bamaga12"
     repo_name = "university-databricks-trainning"
