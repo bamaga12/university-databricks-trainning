@@ -15,7 +15,7 @@ def run_testcase(spark, basePath, mssv, numQuestion):
 
     for file_path in file_list:
         save_path = f"{dbfs_base_path}/{os.path.basename(file_path)}"
-        base.downlofaad_github_file(repo_owner, repo_name, file_path, save_path)
+        base.download_github_file(repo_owner, repo_name, file_path, save_path)
 
     totalpoint = 0
 
