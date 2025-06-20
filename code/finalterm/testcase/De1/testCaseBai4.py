@@ -6,7 +6,7 @@ import baseFunction.baseFunction as base
 
 def run_testcase(spark, basePath, mssv, numQuestion):
     extension = "parquet"
-    github_folder = f"data/result/{basePath}/{numQuestion}"
+    github_folder = f"data/result/{basePath}/De1/{numQuestion}"
     dbfs_base_path = "/mnt/github_files/" + github_folder
     repo_owner = "bamaga12"
     repo_name = "university-databricks-trainning"
